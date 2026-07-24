@@ -8,6 +8,7 @@ import TaskInfoSection from "../components/task/TaskInfoSection";
 import TaskSyncStatus from "../components/task/TaskSyncStatus";
 import TaskHistory from "../components/task/TaskHistory";
 import TaskActions from "../components/task/TaskActions";
+import AttachmentList from "../components/task/AttachmentList";
 
 interface Props {
     navigation: any;
@@ -52,6 +53,7 @@ export default function TaskDetailScreen({ navigation, route }: Props) {
         <ScrollView className={`flex-1 ${bgScreen}`}>
             <TaskInfoSection task={task} />
             <TaskSyncStatus task={task} />
+            <AttachmentList attachments={task.attachments} />
             <TaskHistory task={task} />
             <TaskActions
                 task={task}

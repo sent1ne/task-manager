@@ -31,20 +31,32 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
     const addTask = async (taskData: Omit<Task, "id" | "createdAt" | "updatedAt" | "history" | "syncStatus">) => {
         const now = nowISO();
+
+        const history: HistoryEntry[] = [
+            {
+                id: generateId(),
+                timestamp: now,
+                action: "created",
+                description: "Task created",
+            },
+        ];
+
+        if (taskData.attachments && taskData.attachments.length > 0) {
+            history.push({
+                id: generateId(),
+                timestamp: now,
+                action: "attachment_added",
+                description: `${taskData.attachments.length} attachment(s) added`,
+            });
+        }
+
         const newTask: Task = {
             ...taskData,
             id: generateId(),
             createdAt: now,
             updatedAt: now,
             syncStatus: "Pending Sync",
-            history: [
-                {
-                    id: generateId(),
-                    timestamp: now,
-                    action: "created",
-                    description: "Task created",
-                },
-            ],
+            history,
         };
 
         const updatedTasks = [...tasks, newTask];

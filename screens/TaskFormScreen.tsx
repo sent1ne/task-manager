@@ -2,10 +2,11 @@ import { View, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platfo
 import { useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useTheme, useThemeColors } from "../hooks/useTheme";
-import { TaskStatus } from "../types/task";
+import { TaskStatus, Attachment } from "../types/task";
 import { generateId, nowISO } from "../utils/helpers";
 import DatePickerField from "../components/ui/DatePickerField";
 import FormField from "../components/ui/FormField";
+import AttachmentPicker from "../components/task/AttachmentPicker";
 
 interface Props {
     navigation: any;
@@ -16,7 +17,6 @@ export default function TaskFormScreen({ navigation, route }: Props) {
     const taskId = route?.params?.taskId;
     const isEditing = !!taskId;
     const { addTask, updateTask, getTask } = useTasks();
-
     const { isDark } = useTheme();
     const { bgScreen, border } = useThemeColors();
 
@@ -26,6 +26,7 @@ export default function TaskFormScreen({ navigation, route }: Props) {
     const [description, setDescription] = useState(existingTask?.description || "");
     const [dueDate, setDueDate] = useState(existingTask?.dueDate || "");
     const [address, setAddress] = useState(existingTask?.location.address || "");
+    const [attachments, setAttachments] = useState<Attachment[]>(existingTask?.attachments || []);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
 
@@ -48,11 +49,12 @@ export default function TaskFormScreen({ navigation, route }: Props) {
         setSaving(true);
         try {
             if (isEditing && existingTask) {
+                const hasNewAttachments = attachments.length > existingTask.attachments.length;
                 const historyEntry = {
                     id: generateId(),
                     timestamp: nowISO(),
-                    action: "edited" as const,
-                    description: "Task edited",
+                    action: hasNewAttachments ? "edited" as const : "edited" as const,
+                    description: hasNewAttachments ? "Task edited and attachment(s) added" : "Task edited",
                 };
 
                 await updateTask(taskId, {
@@ -62,6 +64,7 @@ export default function TaskFormScreen({ navigation, route }: Props) {
                     location: { address: address.trim() },
                     updatedAt: nowISO(),
                     history: [...existingTask.history, historyEntry],
+                    attachments,
                 });
             } else {
                 await addTask({
@@ -70,7 +73,7 @@ export default function TaskFormScreen({ navigation, route }: Props) {
                     dueDate,
                     location: { address: address.trim() },
                     status: "New" as TaskStatus,
-                    attachments: [],
+                    attachments,
                 });
             }
             navigation.goBack();
@@ -122,6 +125,11 @@ export default function TaskFormScreen({ navigation, route }: Props) {
                         error={errors.address}
                         required
                         placeholder="Enter address"
+                    />
+
+                    <AttachmentPicker
+                        attachments={attachments}
+                        onAttachmentsChange={setAttachments}
                     />
 
                     <TouchableOpacity
