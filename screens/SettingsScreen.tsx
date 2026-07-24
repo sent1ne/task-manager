@@ -1,36 +1,36 @@
 import { View, Text, Switch } from "react-native";
-import { useState } from "react";
+import { useTheme, useThemeColors } from "../hooks/useTheme";
+import ScreenHeader from "../components/ui/ScreenHeader";
 
 export default function SettingsScreen() {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const { isDark, toggleTheme } = useTheme();
+    const { bgScreen, bgCard, border } = useThemeColors();
 
     return (
-        <View className="flex-1 bg-white px-4 pt-14">
-            <Text className="text-3xl font-bold text-gray-900 mb-6">Settings</Text>
+        <View className={`flex-1 ${bgScreen}`}>
+            <ScreenHeader title="Settings" subtitle="App preferences" />
 
-            <View className="flex-row items-center justify-between py-4 border-b border-gray-200">
-                <View>
-                    <Text className="text-lg text-gray-900">Dark Mode</Text>
-                    <Text className="text-sm text-gray-500">Toggle appearance</Text>
+            <View className="px-4 mt-4">
+                <View className={`flex-row items-center justify-between py-4 border-b ${border}`}>
+                    <View>
+                        <Text className={`text-lg ${isDark ? "text-white" : "text-zinc-900"}`}>Dark Mode</Text>
+                        <Text className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
+                            {isDark ? "Dark theme enabled" : "Light theme enabled"}
+                        </Text>
+                    </View>
+                    <Switch
+                        value={isDark}
+                        onValueChange={toggleTheme}
+                        trackColor={{ false: "#D4D4D8", true: "#93C5FD" }}
+                        thumbColor={isDark ? "#3B82F6" : "#FAFAFA"}
+                    />
                 </View>
-                <Switch
-                    value={isDarkMode}
-                    onValueChange={setIsDarkMode}
-                    trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-                    thumbColor={isDarkMode ? "#3B82F6" : "#F9FAFB"}
-                />
-            </View>
 
-            <View className="mt-8 p-4 bg-gray-50 rounded-xl">
-                <Text className="text-gray-500 text-sm text-center">
-                    Task Manager v1.0.0
-                </Text>
-            </View>
-
-            <View className="mt-auto pb-10 items-center">
-                <Text className="text-gray-900 text-md font-bold">
-                    AN-MA-7459
-                </Text>
+                <View className={`mt-8 p-4 rounded-xl ${bgCard}`}>
+                    <Text className={`text-md text-center  ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
+                        AN-MA-7459
+                    </Text>
+                </View>
             </View>
         </View>
     );
