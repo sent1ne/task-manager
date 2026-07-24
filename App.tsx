@@ -3,6 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { TaskProvider } from "./hooks/useTasks";
+import { ThemeProvider, useTheme } from "./hooks/useTheme";
 
 import TaskListScreen from "./screens/TaskListScreen";
 import TaskFormScreen from "./screens/TaskFormScreen";
@@ -28,6 +30,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 function MainTabs() {
+  const { isDark } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -40,9 +44,15 @@ function MainTabs() {
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#3B82F6",
-        tabBarInactiveTintColor: "#9CA3AF",
         headerShown: false,
-        tabBarStyle: { borderTopWidth: 1, borderTopColor: "#E5E7EB", paddingTop: 4, height: 60 },
+        tabBarStyle: {
+          backgroundColor: isDark ? "#27272A" : "#FFFFFF",  // zinc-800 / white
+          borderTopWidth: 1,
+          borderTopColor: isDark ? "#3F3F46" : "#E4E4E7",  // zinc-700 / zinc-200
+          paddingTop: 4,
+          height: 60,
+        },
+        tabBarInactiveTintColor: isDark ? "#71717A" : "#A1A1AA",
         tabBarLabelStyle: { fontSize: 12, fontWeight: "500" },
       })}
     >
@@ -54,14 +64,39 @@ function MainTabs() {
   );
 }
 
-export default function App() {
+function AppNavigator() {
+  const { isDark } = useTheme();
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
+          },
+          headerTintColor: isDark ? "#F9FAFB" : "#111827",
+          headerTitleStyle: {
+            fontWeight: "600",
+          },
+          contentStyle: {
+            backgroundColor: isDark ? "#111827" : "#F9FAFB",
+          },
+        }}
+      >
         <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
         <Stack.Screen name="TaskDetail" component={TaskDetailScreen} options={{ title: "Task Details", headerBackTitle: "Back" }} />
         <Stack.Screen name="TaskForm" component={TaskFormScreen} options={({ route }) => ({ title: route.params?.taskId ? "Edit Task" : "New Task", headerBackTitle: "Back" })} />
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <TaskProvider>
+        <AppNavigator />
+      </TaskProvider>
+    </ThemeProvider>
   );
 }
